@@ -28,6 +28,7 @@ import gc
 import json
 import os
 import random
+import re
 import time
 import warnings
 from collections.abc import AsyncGenerator, Iterable
@@ -36,6 +37,7 @@ from datetime import datetime
 from typing import Any, Literal, Optional
 
 import numpy as np
+import evaluate
 from tqdm.asyncio import tqdm
 from transformers import PreTrainedTokenizerBase
 
@@ -66,6 +68,8 @@ from benchmark_dataset import (
     HuggingFaceDataset,
     InstructCoderDataset,
     MTBenchDataset,
+    MLPerfDataset,
+    MMLUDataset,
     NextEditPredictionDataset,
     RandomDataset,
     SampleRequest,
@@ -204,46 +208,106 @@ async def get_request(
         # The next request will be sent after the interval.
         await asyncio.sleep(interval)
 
-def calculate_substring_match(
+def calculate_rouge_metrics(
+    input_requests: list[SampleRequest],
+    outputs: list[RequestFuncOutput],
+    use_stemmer: bool = False,
+) -> dict[str, float]:
+    """
+    Calculates ROUGE F1 scores (rouge1, rouge2, rougeL) using the 'evaluate'
+    library. Standard for summarization tasks like in MLPerf.
+    """
+    predictions = []
+    references = []
+    for i in range(len(outputs)):
+        if outputs[i].success and input_requests[i].completion is not None:
+            predictions.append(outputs[i].generated_text.strip())
+            # MLPerf/CNN DailyMail references are in input_requests[i].completion
+            references.append(input_requests[i].completion.strip())
+
+    if not predictions:
+        return {}
+
+    rouge = evaluate.load("rouge")
+    results = rouge.compute(predictions=predictions,
+                            references=references,
+                            use_stemmer=use_stemmer)
+    return {
+        "rouge1": results["rouge1"],
+        "rouge2": results["rouge2"],
+        "rougeL": results["rougeL"],
+    }
+
+
+def calculate_mmlu_accuracy(
     input_requests: list[SampleRequest],
     outputs: list[RequestFuncOutput],
 ) -> float:
     """
-    Calculates the exact match accuracy.
+    Calculates MMLU accuracy. The standard for MMLU is to extract the choice
+    from the model's response and compare it to the ground truth.
 
-    Returns:
-        The accuracy score as a float.
+    The extraction logic is as follows:
+    1. Search for the pattern "The answer is X" or "Answer: X".
+    2. If not found, search for the first occurrence of 'A', 'B', 'C', or 'D'
+       at the beginning of the string or after a parenthesis.
     """
     correct_predictions = 0
     completed_requests = 0
     for i in range(len(outputs)):
-        if outputs[i].success:
+        if outputs[i].success and input_requests[i].completion is not None:
             completed_requests += 1
-            if input_requests[i].completion is not None:
-                if input_requests[i].completion.strip() in outputs[i].generated_text.strip():
-                    correct_predictions += 1
-    
-    accuracy = (correct_predictions / completed_requests 
-                if completed_requests > 0 else 0.0)
-    return accuracy
+            generated_text = outputs[i].generated_text.strip()
+            # MMLUDataset stores the correct option (A, B, C, or D) in completion.
+            completion = input_requests[i].completion.strip().upper()
 
+            predicted_choice = ""
+            # Try to find "The answer is X" or "Answer: X"
+            match = re.search(r"(?:The answer is|Answer:)\s*\(?([A-D])\)?", generated_text, re.IGNORECASE)
+            if match:
+                predicted_choice = match.group(1).upper()
+            else:
+                # Fallback to the first valid choice character, potentially after a (
+                # e.g., "(A)", "A."
+                choices = re.findall(r"^\s*\(?([A-D])\)?", generated_text)
+                if choices:
+                     predicted_choice = choices[0].upper()
+                else:
+                    # Last resort: first A, B, C, or D found
+                    first_letter = re.search(r"([A-D])", generated_text.upper())
+                    if first_letter:
+                        predicted_choice = first_letter.group(1)
+
+            if predicted_choice == completion:
+                correct_predictions += 1
+
+    return (correct_predictions / completed_requests
+            if completed_requests > 0 else 0.0)
 
 def compute_accuracy_metrics(
     input_requests: list[SampleRequest],
     outputs: list[RequestFuncOutput],
+    dataset_name: str,
 ) -> dict[str, float]:
-    """Computes and returns a dictionary of accuracy metrics.
-    
+    """Computes and returns accuracy metrics.
+
     Args:
         input_requests: The list of requests sent to the model.
         outputs: The list of corresponding outputs from the model.
-        
+        dataset_name: The name of the dataset being used.
+        tokenizer: The tokenizer used for tokenizing text.
+
     Returns:
-        A dictionary where keys are metric names and values are the
+        Dictionary where keys are metric names and values are the
         computed scores.
     """
     accuracy_metrics = {}
-    accuracy_metrics["substring_match"] = calculate_substring_match(input_requests, outputs)
+    if dataset_name == "mmlu":
+        accuracy_metrics["mmlu_accuracy"] = calculate_mmlu_accuracy(
+            input_requests, outputs)
+    elif dataset_name == "mlperf":
+        rouge_scores = calculate_rouge_metrics(input_requests, outputs)
+        accuracy_metrics.update(rouge_scores)
     return accuracy_metrics
 
 def calculate_metrics(
@@ -254,6 +318,7 @@ def calculate_metrics(
     selected_percentile_metrics: list[str],
     selected_percentiles: list[float],
     goodput_config_dict: dict[str, float],
+    dataset_name: str,
 ) -> tuple[BenchmarkMetrics, list[int]]:
     actual_output_lens: list[int] = []
     total_input = 0
@@ -327,7 +392,8 @@ def calculate_metrics(
             stacklevel=2,
         )
 
-    accuracy_metrics = compute_accuracy_metrics(input_requests, outputs)
+    accuracy_metrics = compute_accuracy_metrics(input_requests, outputs, dataset_name)
+
     metrics = BenchmarkMetrics(
         completed=completed,
         total_input=total_input,
@@ -387,6 +453,7 @@ async def benchmark(
     max_concurrency: Optional[int],
     lora_modules: Optional[Iterable[str]],
     extra_body: Optional[dict],
+    dataset_name: str,
     ramp_up_strategy: Optional[Literal["linear", "exponential"]] = None,
     ramp_up_start_rps: Optional[int] = None,
     ramp_up_end_rps: Optional[int] = None,
@@ -563,6 +630,7 @@ async def benchmark(
         selected_percentile_metrics=selected_percentile_metrics,
         selected_percentiles=selected_percentiles,
         goodput_config_dict=goodput_config_dict,
+        dataset_name=dataset_name,
     )
 
     print("{s:{c}^{n}}".format(s=" Serving Benchmark Result ", n=50, c="="))
@@ -592,7 +660,10 @@ async def benchmark(
         )
     )
     
-    print(f"AccuracyMetrics: {json.dumps(metrics.accuracy_metrics)}")
+    if metrics.accuracy_metrics:
+        print("{s:{c}^{n}}".format(s=" Accuracy Metrics ", n=50, c="-"))
+        for metric_name, metric_value in metrics.accuracy_metrics.items():
+            print("{:<40} {:<10.4f}".format(f"{metric_name}:", metric_value))
 
 
     result = {
@@ -814,6 +885,17 @@ def main(args: argparse.Namespace):
             num_requests=args.num_prompts,
         )
 
+    elif args.dataset_name == "mlperf":
+        dataset = MLPerfDataset(
+            dataset_path=args.dataset_path,
+        )
+        input_requests = dataset.sample(
+            tokenizer=tokenizer,
+            num_requests=args.num_prompts,
+            max_prompt_len=args.mlperf_input_len,
+            max_total_len=args.max_model_len,
+        )
+
     elif args.dataset_name == "sonnet":
         dataset = SonnetDataset(dataset_path=args.dataset_path)
         # For the "sonnet" dataset, formatting depends on the backend.
@@ -979,6 +1061,7 @@ def main(args: argparse.Namespace):
             max_concurrency=args.max_concurrency,
             lora_modules=args.lora_modules,
             extra_body=sampling_params,
+            dataset_name=args.dataset_name,
             ramp_up_strategy=args.ramp_up_strategy,
             ramp_up_start_rps=args.ramp_up_start_rps,
             ramp_up_end_rps=args.ramp_up_end_rps,
@@ -1101,6 +1184,7 @@ def create_argument_parser():
             "custom",
             "custom-token",
             "mmlu",
+            "mlperf",
         ],
         help="Name of the dataset to benchmark on.",
     )
@@ -1302,6 +1386,20 @@ def create_argument_parser():
         default="HELM",
         choices=["HELM", "Harness"],
         help="Method for MMLU prompt generation.",
+    )
+
+    mlperf_group = parser.add_argument_group("mlperf dataset options")
+    mlperf_group.add_argument(
+        "--mlperf-input-len",
+        type=int,
+        default=1024,
+        help="Number of input tokens per request, used only for mlperf dataset.",
+    )
+    mlperf_group.add_argument(
+        "--max-model-len",
+        type=int,
+        default=2048,
+        help="The maximum model length for MLPerf.",
     )
 
     sonnet_group = parser.add_argument_group("sonnet dataset options")

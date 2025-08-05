@@ -11,6 +11,7 @@ generation. Supported dataset types include:
   - HuggingFace
   - VisionArena
   - MMLU
+  - MLPerf
 """
 
 import base64
@@ -399,6 +400,79 @@ class MMLUDataset(BenchmarkDataset):
                     prompt=prompt,
                     prompt_len=prompt_len,
                     expected_output_len=new_output_len,
+                    completion=completion,
+                ))
+        self.maybe_oversample_requests(samples, num_requests)
+        return samples
+
+
+class MLPerfDataset(BenchmarkDataset):
+    """
+    Implements the MLPerf dataset.
+    """
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.load_data()
+
+    def load_data(self) -> None:
+        dataset = pd.read_pickle(self.dataset_path)
+        mlperf_data = []
+        print(f"Loaded {len(dataset)} data from mlperf dataset")
+        # NOTE: an example row (entry in the dataset) looks like:
+        # system_prompt        You are an AI assistant that helps people find...
+        # question             Given the sentence "A woman with a fairy tatto...
+        # output               To determine if we can conclude that "The woma...
+        # input                <s>[INST] <<SYS>>\nYou are an AI assistant tha...
+        # tok_input            [1, 1, 518, 25580, 29962, 3532, 14816, 29903, ...
+        # tok_output           [1, 1763, 8161, 565, 591, 508, 17668, 393, 376...
+        # origin                                                             cot
+        # tok_input_length                                                   146
+        # tok_output_length                                                  195
+        # TODO: do we want text normalization or any other preprocessing?
+        for _, row in dataset.iterrows():
+            prompt = row["question"]
+            output = row["output"]
+            mlperf_data.append((prompt, output))
+
+        self.data = mlperf_data
+
+    def sample(
+        self,
+        tokenizer: PreTrainedTokenizerBase,
+        num_requests: int,
+        max_prompt_len: int,
+        max_total_len: int,
+        output_len: Optional[int] = None,
+        **kwargs,
+    ) -> list:
+        # TODO(patemotter): Generalize length filtering by moving `max_prompt_len`
+        # and `max_total_len` to the `BenchmarkDataset.sample` base method
+        # and apply `is_valid_sequence` check in all subclasses.
+        samples: list = []
+        for prompt, completion in self.data:
+            if len(samples) >= num_requests:
+                break
+
+            prompt_ids = tokenizer(prompt).input_ids
+            completion_ids = tokenizer(completion).input_ids
+            prompt_len = len(prompt_ids)
+            new_output_len = len(
+                completion_ids) if output_len is None else output_len
+
+            if not is_valid_sequence(
+                    prompt_len,
+                    new_output_len,
+                    max_prompt_len=max_prompt_len,
+                    max_total_len=max_total_len,
+            ):
+                continue
+
+            samples.append(
+                SampleRequest(
+                    prompt=prompt,
+                    prompt_len=prompt_len,
+                    expected_output_len=output_len or new_output_len,
                     completion=completion,
                 ))
         self.maybe_oversample_requests(samples, num_requests)
