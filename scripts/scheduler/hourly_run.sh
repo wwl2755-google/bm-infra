@@ -83,6 +83,10 @@ echo "./scripts/scheduler/create_job.sh ./cases/hourly_torchax_jax.csv \"\" $TAG
 echo "./scripts/scheduler/create_job.sh ./cases/hourly_torchax_jax_customer1.csv \"\" $TAG CUSTOMER1_HOURLY_AX_JAX TPU_COMMONS \"TPU_BACKEND_TYPE=jax;MODEL_IMPL_TYPE=vllm\""
 ./scripts/scheduler/create_job.sh ./cases/hourly_torchax_jax_customer1.csv "" $TAG CUSTOMER1_HOURLY_AX_JAX TPU_COMMONS "TPU_BACKEND_TYPE=jax;MODEL_IMPL_TYPE=vllm"
 
+# TODO - Move this to nightly once we have more stable runs
+echo "./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv \"\" $TAG BENCH_COMP_TPU TPU_COMMONS \"TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True\""
+./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv "" $TAG BENCH_COMP_TPU TPU_COMMONS "TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True"
+
 if [[ "$HOUR_NOW" == "00" || "$HOUR_NOW" == "12" ]]; then
   # vLLM
   echo "./scripts/scheduler/create_job.sh ./cases/autotune.csv \"\" $TAG AUTOTUNE"
@@ -108,10 +112,6 @@ if [[ "$HOUR_NOW" == "00" || "$HOUR_NOW" == "12" ]]; then
 
   echo "./scripts/scheduler/create_job.sh ./cases/autotune_torchax_jax_customer1.csv \"\" $TAG CUSTOMER1_AUTOTUNE_AX_JAX TPU_COMMONS \"TPU_BACKEND_TYPE=jax;MODEL_IMPL_TYPE=vllm\""
   ./scripts/scheduler/create_job.sh ./cases/autotune_torchax_jax_customer1.csv "" $TAG CUSTOMER1_AUTOTUNE_AX_JAX TPU_COMMONS "TPU_BACKEND_TYPE=jax;MODEL_IMPL_TYPE=vllm"
-
-  # TODO - Move this to nightly once we have more stable runs
-  echo "./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv \"\" $TAG BENCH_COMP_TPU TPU_COMMONS \"TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True\""
-  ./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv "" $TAG BENCH_COMP_TPU TPU_COMMONS "TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True"
 
   # JAX accuracy
   echo "./scripts/scheduler/create_job.sh ./cases/accuracy_jax.csv \"\" $TAG AUTOTUNE_AX_JAX TPU_COMMONS \"TPU_BACKEND_TYPE=jax;MODEL_IMPL_TYPE=vllm\""
