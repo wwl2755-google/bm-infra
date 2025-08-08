@@ -168,6 +168,7 @@ run_benchmark(){
       --dataset-name custom \
       --dataset-path $dataset_path \
       --num-prompts ${NUM_PROMPTS} \
+      --custom-output-len $OUTPUT_LEN \
       --percentile-metrics ttft,tpot,itl,e2el \
       $PROFILE_FLAG \
       --ignore-eos > "$BM_LOG" 2>&1
