@@ -112,17 +112,21 @@ if [[ "$HOUR_NOW" == "00" || "$HOUR_NOW" == "12" ]]; then
   echo "./scripts/scheduler/create_job.sh ./cases/autotune_torchax_jax_customer1.csv \"\" $TAG CUSTOMER1_AUTOTUNE_AX_JAX TPU_COMMONS \"TPU_BACKEND_TYPE=jax;MODEL_IMPL_TYPE=vllm\""
   ./scripts/scheduler/create_job.sh ./cases/autotune_torchax_jax_customer1.csv "" $TAG CUSTOMER1_AUTOTUNE_AX_JAX TPU_COMMONS "TPU_BACKEND_TYPE=jax;MODEL_IMPL_TYPE=vllm"
 
+  # TODO - Move this to nightly once we have more stable runs
+  echo "./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv \"\" $TAG BENCH_COMP_TPU TPU_COMMONS \"TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True\""
+  ./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv "" $TAG BENCH_COMP_TPU TPU_COMMONS "TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True"
+
   # Adhoc
   # echo "./scripts/scheduler/create_job.sh ./cases/autotune_adhoc.csv \"\" $TAG AUTOTUNE "
   # ./scripts/scheduler/create_job.sh ./cases/autotune_adhoc.csv "" $TAG AUTOTUNE
 fi
 
 # Only runs nightly
-if [[ "$HOUR_NOW" == "00" ]]; then
-  # Run comparison benchmarks
-  echo "./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv \"\" $TAG BENCH_COMP_TPU TPU_COMMONS \"TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True\""
-  ./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv "" $TAG BENCH_COMP_TPU TPU_COMMONS "TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True"
-fi
+# if [[ "$HOUR_NOW" == "00" ]]; then
+#   # Run comparison benchmarks
+#   echo "./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv \"\" $TAG BENCH_COMP_TPU TPU_COMMONS \"TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True\""
+#   ./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv "" $TAG BENCH_COMP_TPU TPU_COMMONS "TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True"
+# fi
 
 # if [[ "$HOUR_NOW" == "00" ]]; then
 #   # B200 not enough hardware to run it twice a day.
