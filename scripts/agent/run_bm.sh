@@ -35,6 +35,8 @@ mkdir -p "$PROFILE_FOLDER"
 # Ingore the error because in case of using uv, the packages are installed outside this script.
 pip install pandas || true
 pip install datasets || true
+pip install evaluate==0.4.5 || true
+pip install rouge-score==0.1.2 || true
 
 if [ "$DATASET" = "sonnet" ]; then
   echo "Create sonnet_4x.txt"
@@ -142,6 +144,19 @@ run_benchmark(){
       --dataset-path /workspace/dataset \
       --mmlu-num-shots 5 \
       --mmlu-method HELM \
+      --num-prompts ${NUM_PROMPTS} \
+      --percentile-metrics ttft,tpot,itl,e2el \
+      $PROFILE_FLAG \
+      --ignore-eos > "$BM_LOG" 2>&1
+  elif [ "$DATASET" = "mlperf" ]; then
+    python benchmarks/benchmark_serving.py \
+      --backend vllm \
+      --model $MODEL \
+      --request-rate $request_rate \
+      --dataset-name mlperf \
+      --dataset-path /workspace/dataset/processed-data.pkl \
+      --mlperf-input-len $INPUT_LEN \
+      --max-model-len $MAX_MODEL_LEN \
       --num-prompts ${NUM_PROMPTS} \
       --percentile-metrics ttft,tpot,itl,e2el \
       $PROFILE_FLAG \
