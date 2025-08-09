@@ -50,13 +50,10 @@ else
   ./scripts/scheduler/create_job.sh ./cases/hourly_gpu_2.csv "" $TAG HOURLY
 fi
 
-# # B200 is not stable right now. Lower the running frequency to reduce the load.
-# if (( 10#$HOUR_NOW % 6 == 0 )); then
-#   # Run b200-8
-#   # todo: this can be merged into hourly run.
-#   echo "./scripts/scheduler/create_job.sh ./cases/hourly_b200.csv \"\" $TAG HOURLY"
-#   ./scripts/scheduler/create_job.sh ./cases/hourly_b200.csv "" $TAG HOURLY
-# fi
+# Run b200-8
+# todo: this can be merged into hourly run.
+echo "./scripts/scheduler/create_job.sh ./cases/hourly_b200.csv \"\" $TAG HOURLY"
+./scripts/scheduler/create_job.sh ./cases/hourly_b200.csv "" $TAG HOURLY
 
 # Run TPU Commons + TorchAX test.
 # Eventually, TorchAx and vLLM should run the same test case.
@@ -129,18 +126,14 @@ fi
 #   ./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv "" $TAG BENCH_COMP_TPU TPU_COMMONS "TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True"
 # fi
 
-# if [[ "$HOUR_NOW" == "00" ]]; then
-#   # B200 not enough hardware to run it twice a day.
-#   echo "./scripts/scheduler/create_job.sh ./cases/autotune_b200.csv \"\" $TAG AUTOTUNE"
-#   ./scripts/scheduler/create_job.sh ./cases/autotune_b200.csv "" $TAG AUTOTUNE
-# fi
+if [[ "$HOUR_NOW" == "02" ]]; then
+  # B200 not enough hardware to run it twice a day.
+  echo "./scripts/scheduler/create_job.sh ./cases/autotune_b200.csv \"\" $TAG AUTOTUNE"
+  ./scripts/scheduler/create_job.sh ./cases/autotune_b200.csv "" $TAG AUTOTUNE
+fi
 
 echo LOCAL_PATCH=1 ./scripts/scheduler/create_job.sh ./cases/hourly_disagg.csv "" $TAG HOURLY_DISAGG TPU_COMMONS "PREFILL_SLICES=2;DECODE_SLICES=2;TPU_BACKEND_TYPE=jax"
 LOCAL_PATCH=1 ./scripts/scheduler/create_job.sh ./cases/hourly_disagg.csv "" $TAG HOURLY_DISAGG TPU_COMMONS "PREFILL_SLICES=2;DECODE_SLICES=2;TPU_BACKEND_TYPE=jax"
-
-# torch xla with profile
-# echo "./scripts/scheduler/create_job.sh ./cases/hourly.csv \"\" $TAG XPROF_XLA"
-# ./scripts/scheduler/create_job.sh ./cases/hourly.csv "" $TAG XPROF_XLA DEFAULT "PROFILE=1"
 
 echo "./scripts/cleanup_docker.sh"
 ./scripts/cleanup_docker.sh
