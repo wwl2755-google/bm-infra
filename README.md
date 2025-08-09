@@ -109,7 +109,7 @@ GCP_INSTANCE_ID=vllm-bm-inst
 GCP_DATABASE_ID=vllm-bm-runs
 GCP_REGION=southamerica-west1
 GCS_BUCKET=vllm-cb-storage2
-GCP_QUEUE=vllm-bm-queue-<v6e-1, v6e-4, v6e-6>
+GCP_QUEUE=vllm-bm-queue-<debug-1, debug-2>
 HF_TOKEN=<your hugging face token>
 GCP_INSTANCE_NAME=<your instance name>
 LOCAL_RUN_BM=<0:run with docker, 1: run with VM and conda, 2: run with VM and uv>
@@ -117,6 +117,8 @@ GITHUB_USERNAME=<user name - for only private repo>
 GITHUB_PERSONAL_ACCESS_TOKEN=<access token - for only private repo>
 '| sudo tee -a /etc/environment
 ```
+
+Note: if you want to connect to "real" job queue, use the real device name like h100-8, v6e-8. But it means your machine will pull message from the real job. Usually, debug queue should be good enough for developing and debug.
 
 ### Attach a disk and mount to /mnt/disks/persist
 
