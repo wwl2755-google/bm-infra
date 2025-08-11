@@ -62,7 +62,7 @@ echo "$RECORDS_JSON" | jq --arg GCS_BUCKET "$GCS_BUCKET" '
       "MaxNumBatchedTokens": .[7],
       "MaxModelLen": .[8],
       "Profile": "gs://\($GCS_BUCKET)/job_logs/\(.[4])/static_profile",
-      "upload_command": "blaze run -c opt //cloud/tpu/tools/c2xprof:main -- --alsologtostderr --gcs_path=gs://\($GCS_BUCKET)/job_logs/\(.[4])/static_profile"
+      "upload_command": "c2x --gcs_path=gs://\($GCS_BUCKET)/job_logs/\(.[4])/static_profile"
     }
   )
 '

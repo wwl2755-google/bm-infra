@@ -12,6 +12,7 @@ SELECT
   r.MaxNumBatchedTokens,
   r.TensorParallelSize,
   r.MaxModelLen,
+  r.NumPrompts,
   r.Dataset,
   r.InputLen,
   r.OutputLen,
@@ -26,7 +27,7 @@ SELECT
 FROM RunRecord r
 WHERE r.RunType in ('HOURLY', 'HOURLY_TORCHAX', 'HOURLY_JAX', 'HOURLY_AX_JAX')
   AND r.Status IN ('COMPLETED', 'FAILED')
-  AND r.CreatedTime >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 15 DAY)
+  AND r.CreatedTime >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 DAY)
   AND r.Throughput = (
     SELECT MAX(r2.Throughput)
     FROM RunRecord r2
@@ -37,6 +38,6 @@ WHERE r.RunType in ('HOURLY', 'HOURLY_TORCHAX', 'HOURLY_JAX', 'HOURLY_AX_JAX')
       AND r2.RunType in ('HOURLY', 'HOURLY_TORCHAX', 'HOURLY_JAX', 'HOURLY_AX_JAX')
       AND r2.Dataset = r.Dataset
       AND r2.Status IN ('COMPLETED', 'FAILED')
-      AND r2.CreatedTime >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 15 DAY)
+      AND r2.CreatedTime >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 DAY)
   )
 ORDER BY r.JobReference;

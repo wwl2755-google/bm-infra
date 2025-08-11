@@ -35,7 +35,7 @@ variable "v6e_4_count" {
 }
 
 variable "v6e_8_count" {
-  default     = 8
+  default     = 12
 }
 
 variable "instance_name_offset" {
@@ -45,6 +45,6 @@ variable "instance_name_offset" {
 }
 
 variable "branch_hash" {
-  default     = "1863e7300422cc775b051193da0a289f3648843f"
+  default     = "49f9415095c053f729702035c9daeb14c5c65f02"
   description = "commit hash of bm-infra branch."
 }

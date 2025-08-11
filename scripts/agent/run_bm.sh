@@ -35,6 +35,8 @@ mkdir -p "$PROFILE_FOLDER"
 # Ingore the error because in case of using uv, the packages are installed outside this script.
 pip install pandas || true
 pip install datasets || true
+pip install evaluate==0.4.5 || true
+pip install rouge-score==0.1.2 || true
 
 if [ "$DATASET" = "sonnet" ]; then
   echo "Create sonnet_4x.txt"
@@ -89,6 +91,7 @@ done
 
 EXPECTED_ETEL=${EXPECTED_ETEL:-3600000}
 NUM_PROMPTS=${NUM_PROMPTS:-1000}
+PREFIX_LEN=${PREFIX_LEN:-0}
 
 PROFILE_FLAG=""
 
@@ -145,6 +148,19 @@ run_benchmark(){
       --percentile-metrics ttft,tpot,itl,e2el \
       $PROFILE_FLAG \
       --ignore-eos > "$BM_LOG" 2>&1
+  elif [ "$DATASET" = "mlperf" ]; then
+    python benchmarks/benchmark_serving.py \
+      --backend vllm \
+      --model $MODEL \
+      --request-rate $request_rate \
+      --dataset-name mlperf \
+      --dataset-path /workspace/dataset/processed-data.pkl \
+      --mlperf-input-len $INPUT_LEN \
+      --max-model-len $MAX_MODEL_LEN \
+      --num-prompts ${NUM_PROMPTS} \
+      --percentile-metrics ttft,tpot,itl,e2el \
+      $PROFILE_FLAG \
+      --ignore-eos > "$BM_LOG" 2>&1
   elif [ "$DATASET" = "custom-token" ]; then
     dataset_path="$WORKSPACE/dataset/${MODEL##*/}_${INPUT_LEN}_${OUTPUT_LEN}_tp${TENSOR_PARALLEL_SIZE}.json"
     python benchmarks/benchmark_serving.py \
@@ -154,6 +170,20 @@ run_benchmark(){
       --dataset-name custom-token \
       --dataset-path $dataset_path \
       --num-prompts ${NUM_PROMPTS} \
+      --percentile-metrics ttft,tpot,itl,e2el \
+      $PROFILE_FLAG \
+      --ignore-eos > "$BM_LOG" 2>&1
+  elif [ "$DATASET" = "bench-custom-token" ]; then
+    dataset_path="$WORKSPACE/dataset/${MODEL##*/}/inlen${INPUT_LEN}_outlen${OUTPUT_LEN}_prefixlen${PREFIX_LEN}.jsonl"
+    echo "dataset_path: $dataset_path"
+    python benchmarks/benchmark_serving.py \
+      --backend vllm \
+      --model $MODEL \
+      --request-rate $request_rate \
+      --dataset-name custom \
+      --dataset-path $dataset_path \
+      --num-prompts ${NUM_PROMPTS} \
+      --custom-output-len $OUTPUT_LEN \
       --percentile-metrics ttft,tpot,itl,e2el \
       $PROFILE_FLAG \
       --ignore-eos > "$BM_LOG" 2>&1

@@ -27,11 +27,24 @@ VERY_LARGE_EXPECTED_ETEL=3600000
 # export GCP_DATABASE_ID="your-database"
 
 # === Read CSV and skip header ===
-tail -n +2 "$CSV_FILE" | while read -r line; do
+tail -n +2 "$CSV_FILE" | while read -r line || [ -n "${line}" ]; do
 
   line=$(echo "$line" | tr -d '\r')
     # Safely split CSV line into variables
-  IFS=',' read -r DEVICE MODEL MAX_NUM_SEQS MAX_NUM_BATCHED_TOKENS TENSOR_PARALLEL_SIZE MAX_MODEL_LEN DATASET INPUT_LEN OUTPUT_LEN EXPECTED_ETEL NUM_PROMPTS MODELTAG<<< "$line"
+  IFS=',' read -r \
+    DEVICE \
+    MODEL \
+    MAX_NUM_SEQS \
+    MAX_NUM_BATCHED_TOKENS \
+    TENSOR_PARALLEL_SIZE \
+    MAX_MODEL_LEN \
+    DATASET \
+    INPUT_LEN \
+    OUTPUT_LEN \
+    EXPECTED_ETEL \
+    NUM_PROMPTS \
+    MODELTAG \
+    PREFIX_LEN <<< "$line"
 
   RECORD_ID=$(uuidgen | tr 'A-Z' 'a-z')
 
@@ -52,11 +65,24 @@ tail -n +2 "$CSV_FILE" | while read -r line; do
     --sql="INSERT INTO RunRecord (
       RecordId, Status, CreatedTime, Device, Model, RunType, CodeHash,
       MaxNumSeqs, MaxNumBatchedTokens, TensorParallelSize, MaxModelLen,
-      Dataset, InputLen, OutputLen, LastUpdate, CreatedBy,JobReference, ExpectedETEL, NumPrompts, ModelTag, ExtraEnvs
+      Dataset, InputLen, OutputLen, LastUpdate, CreatedBy,JobReference, ExpectedETEL, NumPrompts, ModelTag, PrefixLen, ExtraEnvs
     ) VALUES (
       '$RECORD_ID', 'CREATED', PENDING_COMMIT_TIMESTAMP(), '$DEVICE', '$MODEL', '$RUN_TYPE', '$CODEHASH',
-      $MAX_NUM_SEQS, $MAX_NUM_BATCHED_TOKENS, $TENSOR_PARALLEL_SIZE, $MAX_MODEL_LEN,
-      '$DATASET', $INPUT_LEN, $OUTPUT_LEN, PENDING_COMMIT_TIMESTAMP(), '$USER', '$JOB_REFERENCE',${EXPECTED_ETEL:-$VERY_LARGE_EXPECTED_ETEL}, ${NUM_PROMPTS:-1000}, '$MODELTAG', '$EXTRA_ENVS'
+      $MAX_NUM_SEQS,
+      $MAX_NUM_BATCHED_TOKENS,
+      $TENSOR_PARALLEL_SIZE,
+      $MAX_MODEL_LEN,
+      '$DATASET',
+      $INPUT_LEN,
+      $OUTPUT_LEN,
+      PENDING_COMMIT_TIMESTAMP(),
+      '$USER',
+      '$JOB_REFERENCE',
+      ${EXPECTED_ETEL:-$VERY_LARGE_EXPECTED_ETEL},
+      ${NUM_PROMPTS:-1000},
+      '${MODELTAG:-PROD}',
+      ${PREFIX_LEN:-0},
+      '$EXTRA_ENVS'
     );"
   
   # If insert failed, just continue without publishing

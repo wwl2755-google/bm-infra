@@ -18,8 +18,10 @@ SELECT
   -- tuned
   view1.MaxNumSeqs as BestMaxNumSeqs,
   view1.MaxNumBatchedTokens as BestMaxNumBatchedTokens,
+  view1.NumPrompts as BestNumPrompts,
   view2.MaxNumSeqs as HourlyMaxNumSeqs,
-  view2.MaxNumBatchedTokens as HourlyMaxNumBatchedTokens
+  view2.MaxNumBatchedTokens as HourlyMaxNumBatchedTokens,
+  view2.NumPrompts as HourlyNumPrompts  
 FROM
   AutoTuneBestResult AS view1
 JOIN

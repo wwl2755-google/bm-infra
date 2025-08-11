@@ -19,9 +19,13 @@ resource "google_tpu_v2_vm" "tpu_v6" {
   runtime_version  = "v2-alpha-tpuv6e"
   accelerator_type = "${var.accelerator_type}"
   
-  scheduling_config {
-    reserved = var.reserved
+  dynamic "scheduling_config" {    
+    for_each = var.reserved ? [1] : []
+    content {
+      reserved = var.reserved
+    }
   }
+
   network_config {
     network           = "projects/${data.google_project.current.project_id}/global/networks/default"                         
     enable_external_ips = true

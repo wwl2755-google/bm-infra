@@ -87,8 +87,10 @@ docker run \
  -v /dev/shm:/dev/shm \
  $image_tag tail -f /dev/null
 
-# =============== temp solution ===============
-if [ "$DATASET" = "custom-token" ] || [ "$DATASET" = "mmlu" ]; then
+# =============== temp solution start ===============
+
+DATASETS=("custom-token" "mmlu" "mlperf" "bench-custom-token")
+if [[ " ${DATASETS[*]} " == * " $DATASET " * ]]; then
   echo "Temp solution: Syncing dataset for $DATASET"
 
   mkdir -p ./artifacts/dataset/
@@ -99,6 +101,12 @@ if [ "$DATASET" = "custom-token" ] || [ "$DATASET" = "mmlu" ]; then
   elif [ "$DATASET" = "mmlu" ]; then
     # Download mmlu directory recursively
     gsutil -m cp -r gs://$GCS_BUCKET/dataset/mmlu/* ./artifacts/dataset/
+  elif [ "$DATASET" = "mlperf" ]; then
+    # Download single pkl file for MLPerf
+    gsutil -m cp -r gs://$GCS_BUCKET/dataset/mlperf/processed-data.pkl ./artifacts/dataset/
+  elif [ "$DATASET" = "bench-custom-token" ]; then
+    # Download flat files for custom-token
+    gsutil -m cp -r gs://$GCS_BUCKET/bench-dataset/* ./artifacts/dataset/
   fi
 
   echo "Copying dataset to container..."
@@ -111,7 +119,7 @@ if [ "$DATASET" = "custom-token" ] || [ "$DATASET" = "mmlu" ]; then
   docker cp scripts/agent/benchmark_dataset.py "$CONTAINER_NAME:/workspace/vllm/benchmarks/benchmark_dataset.py"
 fi
 
-# ===============  temp solution ===============
+# =============== temp solution end ===============
 
 if [ "$DATASET" = "sharegpt" ]; then  
   echo "Copying dataset to container..."

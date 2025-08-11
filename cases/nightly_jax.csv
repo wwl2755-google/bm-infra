@@ -1,0 +1,2 @@
+Device,Model,MaxNumSeqs,MaxNumBatchedTokens,TensorParallelSize,MaxModelLen,Dataset,InputLen,OutputLen,ExpectedETEL,NumPrompts,ModelTag,PrefixLen
+v6e-8,meta-llama/Llama-3.1-8B-Instruct,256,10240,8,10240,bench-custom-token,2048,8192,,1000,NEW,0
