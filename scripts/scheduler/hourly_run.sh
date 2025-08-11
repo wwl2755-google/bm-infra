@@ -83,9 +83,6 @@ echo "./scripts/scheduler/create_job.sh ./cases/hourly_torchax_jax.csv \"\" $TAG
 echo "./scripts/scheduler/create_job.sh ./cases/hourly_torchax_jax_customer1.csv \"\" $TAG CUSTOMER1_HOURLY_AX_JAX TPU_COMMONS \"TPU_BACKEND_TYPE=jax;MODEL_IMPL_TYPE=vllm\""
 ./scripts/scheduler/create_job.sh ./cases/hourly_torchax_jax_customer1.csv "" $TAG CUSTOMER1_HOURLY_AX_JAX TPU_COMMONS "TPU_BACKEND_TYPE=jax;MODEL_IMPL_TYPE=vllm"
 
-# TODO - Move this to nightly once we have more stable runs
-echo "./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv \"\" $TAG BENCH_COMP_TPU TPU_COMMONS \"TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True\""
-./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv "" $TAG BENCH_COMP_TPU TPU_COMMONS "TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True"
 
 if [[ "$HOUR_NOW" == "00" || "$HOUR_NOW" == "12" ]]; then
   # vLLM
@@ -125,12 +122,12 @@ if [[ "$HOUR_NOW" == "01" || "$HOUR_NOW" == "13" ]]; then
 
 fi
 
-# Only runs nightly
-# if [[ "$HOUR_NOW" == "00" ]]; then
+# Too many autotune that can't be scheduled in one hour, separating these runs from autotune above.
+if [[ "$HOUR_NOW" == "03" || "$HOUR_NOW" == "15" ]]; then
 #   # Run comparison benchmarks
-#   echo "./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv \"\" $TAG BENCH_COMP_TPU TPU_COMMONS \"TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True\""
-#   ./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv "" $TAG BENCH_COMP_TPU TPU_COMMONS "TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True"
-# fi
+  echo "./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv \"\" $TAG BENCH_COMP_TPU TPU_COMMONS \"TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True\""
+  ./scripts/scheduler/create_job.sh ./cases/nightly_jax.csv "" $TAG BENCH_COMP_TPU TPU_COMMONS "TPU_BACKEND_TYPE=jax;NEW_MODEL_DESIGN=True"
+fi
 
 if [[ "$HOUR_NOW" == "02" ]]; then
   # B200 not enough hardware to run it twice a day.
