@@ -1,0 +1,3 @@
+Device,Model,MaxNumSeqs,MaxNumBatchedTokens,TensorParallelSize,MaxModelLen,Dataset,InputLen,OutputLen,ExpectedETEL,NumPrompts
+v6e-1,meta-llama/Llama-3.1-8B-Instruct,256,1024,1,2048,sharegpt,0,0,,
+v6e-4,meta-llama/Llama-3.1-70B-Instruct,256,2048,4,2048,sharegpt,0,0,,

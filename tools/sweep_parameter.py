@@ -63,10 +63,10 @@ if __name__ == "__main__":
         input_csv_path=input_csv_path,
         output_csv_path=output_csv_path,
         sweep_config={
-            "MaxNumSeqs": [128, 256, 512,],
-            "MaxNumBatchedTokens": [16384, 32768],
+            "MaxNumSeqs": [128, 256, 512],
+            "MaxNumBatchedTokens": [128, 256, 512, 1024, 2048, 4096],
             # adhock sweep
-            "NumPrompts": [1000, 2000, 3000],
+            "NumPrompts": [200, 1000],
             # "ExpectedETEL": [500, 1000]
         }
     )
