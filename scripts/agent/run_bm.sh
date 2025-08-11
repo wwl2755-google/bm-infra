@@ -174,15 +174,12 @@ run_benchmark(){
       --num-prompts "$NUM_PROMPTS"
       --percentile-metrics ttft,tpot,itl,e2el
       --ignore-eos
+      $PROFILE_FLAG
     )
 
     if [ "$OUTPUT_LEN" -ne 0 ]; then
       ARGS+=(--sharegpt-output-len "$OUTPUT_LEN")
-    fi
-
-    if [[ "$PROFILE" -eq 1 ]]; then
-      PROFILE_FLAG="--profile"
-    fi
+    fi    
 
     python benchmarks/benchmark_serving.py "${ARGS[@]}" > "$BM_LOG" 2>&1
     
