@@ -9,6 +9,7 @@ SELECT
   r.Throughput,
   r.MaxNumSeqs,
   r.MaxNumBatchedTokens,
+  r.NumPrompts,
   r.TensorParallelSize,
   r.MaxModelLen,
   r.RunType,
@@ -26,7 +27,7 @@ SELECT
 FROM RunRecord r
 WHERE r.RunType IN ('AUTOTUNE', 'AUTOTUNE_TORCHAX', 'AUTOTUNE_JAX', 'AUTOTUNE_AX_JAX')
   AND r.Status IN ('COMPLETED', 'FAILED')
-  AND r.CreatedTime >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 15 DAY)
+  AND r.CreatedTime >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 DAY)
   AND r.Throughput = (
     SELECT MAX(r2.Throughput)
     FROM RunRecord r2
@@ -40,6 +41,6 @@ WHERE r.RunType IN ('AUTOTUNE', 'AUTOTUNE_TORCHAX', 'AUTOTUNE_JAX', 'AUTOTUNE_AX
       AND r2.RunType IN ('AUTOTUNE', 'AUTOTUNE_TORCHAX', 'AUTOTUNE_JAX', 'AUTOTUNE_AX_JAX')
       AND r2.RunType = r.RunType
       AND r2.Status IN ('COMPLETED', 'FAILED')
-      AND r2.CreatedTime >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 15 DAY)
+      AND r2.CreatedTime >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 3 DAY)
   )
 ORDER BY r.JobReference;
