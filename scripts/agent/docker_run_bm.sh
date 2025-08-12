@@ -157,6 +157,7 @@ output_token_throughput=$(grep "Output token throughput (tok/s):" "$BM_LOG" | se
 total_token_throughput=$(grep "Total Token throughput (tok/s):" "$BM_LOG" | sed 's/[^0-9.]//g')
 # Extract the JSON string for accuracy metrics. The sed command removes the 'AccuracyMetrics: ' prefix.
 AccuracyMetricsJSON=$(grep "AccuracyMetrics:" "$BM_LOG" | sed 's/AccuracyMetrics: //')
+echo "AccuracyMetricsJSON: $AccuracyMetricsJSON"
 
 #
 # compare the throughput with EXPECTED_THROUGHPUT 

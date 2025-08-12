@@ -142,7 +142,7 @@ run_benchmark(){
       --request-rate $request_rate \
       --dataset-name mmlu \
       --dataset-path /workspace/dataset \
-      --mmlu-num-shots 5 \
+      --mmlu-num-shots 0 \
       --mmlu-method HELM \
       --num-prompts ${NUM_PROMPTS} \
       --percentile-metrics ttft,tpot,itl,e2el \

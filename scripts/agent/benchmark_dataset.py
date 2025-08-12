@@ -296,8 +296,8 @@ class MMLUDataset(BenchmarkDataset):
         assert dataset_path != ""
         dataset = []
         prompts_per_subject = dict()
-        for root, _, files in os.walk(dataset_path):
-            for csv_file in files:
+        for root, _, files in sorted(os.walk(dataset_path)):
+            for csv_file in sorted(files):
                 if csv_file.endswith(".csv"):
                     subject = " ".join(csv_file.split("_")[:-1])
                     if subject not in prompts_per_subject:
@@ -311,6 +311,8 @@ class MMLUDataset(BenchmarkDataset):
             raise FileNotFoundError(f"No CSV files found in {dataset_path}")
 
         combined_dataset = pd.concat(dataset, ignore_index=True)
+        combined_dataset = combined_dataset.sample(
+            frac=1, random_state=self.random_seed).reset_index(drop=True)
         header_dict = {
             0: "question",
             1: "A",
@@ -368,6 +370,8 @@ class MMLUDataset(BenchmarkDataset):
             prompt = prompts_per_subject[row["subject"]] + question_prompt
             mmlu_data.append((prompt, output))
 
+        random.seed(self.random_seed)
+        random.shuffle(mmlu_data)
         self.data = mmlu_data
 
     def sample(
