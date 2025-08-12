@@ -90,7 +90,7 @@ docker run \
 # =============== temp solution start ===============
 
 DATASETS=("custom-token" "mmlu" "mlperf" "bench-custom-token")
-if [[ " ${DATASETS[*]} " == * " $DATASET " * ]]; then
+if [[ " ${DATASETS[*]} " == *" $DATASET "* ]]; then
   echo "Temp solution: Syncing dataset for $DATASET"
 
   mkdir -p ./artifacts/dataset/
