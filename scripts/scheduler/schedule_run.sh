@@ -2,15 +2,29 @@
 
 # === Usage ===
 if [ "$#" -ne 5 ]; then
-  echo "Usage: $0 input.csv CODEHASH JOB_REFERENCE RUN_TYPE EXTRA_ENVS"
+  echo "Usage: $0 <input.csv|gs://path/to/input.csv> CODEHASH JOB_REFERENCE RUN_TYPE EXTRA_ENVS"
   exit 1
 fi
 
-CSV_FILE="$1"
+CSV_FILE_ARG="$1"
 CODEHASH="$2"
 JOB_REFERENCE="$3"
 RUN_TYPE="$4"
 EXTRA_ENVS="$5"
+
+if [[ "$CSV_FILE_ARG" == gs://* ]]; then
+  echo "GCS path detected. Downloading from $CSV_FILE_ARG"
+  CSV_FILE=$(mktemp)
+  if ! gsutil cp "$CSV_FILE_ARG" "$CSV_FILE"; then
+    echo "Failed to download from GCS: $CSV_FILE_ARG"
+    rm "$CSV_FILE"
+    exit 1
+  fi
+  # Schedule cleanup of the temporary file on exit
+  trap 'rm -f "$CSV_FILE"' EXIT
+else
+  CSV_FILE="$CSV_FILE_ARG"
+fi
 
 if [ ! -f "$CSV_FILE" ]; then
   echo "CSV file not found: $CSV_FILE"

@@ -35,8 +35,8 @@ sudo apt-get update && sudo apt-get install -y jq
 1. login to gcp: `gcloud auth login`.
 1. create a test case file like ./cases/case1.csv. Save it to a file like ~/my_test.csv
 1. go to this source code folder.
-1. Run `./scripts/scheduler/create_job.sh <INPUT_CSV> [CODE_HASH] [JOB_REFERENCE] [RUN_TYPE]`
-   - INPUT_CSV: the test case file
+1. Run `./scripts/scheduler/create_job.sh <INPUT_CSV_PATH> [CODE_HASH] [JOB_REFERENCE] [RUN_TYPE]`
+   - INPUT_CSV_PATH: the test case file. This can either be a local filepath or a GCS storage URI (gs://\<path>)
    - CODE_HASH: the [vllm](https://github.com/vllm-project/vllm) code hash you want to run. use "" to indicate latest.
    - JOB_REFERENCE: A string that you can use later to find the job in database.
    - RUN_TYPE: default is "MANUAL". No need to set this usually.
@@ -49,6 +49,8 @@ Example:
 ./scripts/scheduler/create_job.sh ./configs/case1.csv
 
 ./scripts/scheduler/create_job.sh ~/my_test.csv da9b523ce1fd5c27bfd18921ba0388bf2e8e4618 my_first_test
+
+./scripts/scheduler/create_job.sh gs://bm-infra/my_case.csv
 ```
 
 To see job status
