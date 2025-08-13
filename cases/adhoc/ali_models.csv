@@ -1,0 +1,4 @@
+Device,Model,MaxNumSeqs,MaxNumBatchedTokens,TensorParallelSize,MaxModelLen,Dataset,InputLen,OutputLen,ExpectedETEL,NumPrompts
+v6e-1,Qwen/Qwen2.5-7B-Instruct,512,2048,1,64,random,30,30,1000,
+v6e-8,Qwen/Qwen2.5-32B,64,2048,8,10368,sonnet,10000,300,,
+v6e-4,Qwen/Qwen2.5-32B,64,512,4,10368,sonnet,10000,300,,
