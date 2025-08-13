@@ -633,6 +633,9 @@ async def benchmark(
         dataset_name=dataset_name,
     )
 
+    if metrics.accuracy_metrics:
+        print(f"AccuracyMetrics: {json.dumps(metrics.accuracy_metrics)}")
+
     print("{s:{c}^{n}}".format(s=" Serving Benchmark Result ", n=50, c="="))
     print("{:<40} {:<10}".format("Successful requests:", metrics.completed))
     print("{:<40} {:<10.2f}".format("Benchmark duration (s):", benchmark_duration))
@@ -883,6 +886,7 @@ def main(args: argparse.Namespace):
         input_requests = dataset.sample(
             tokenizer=tokenizer,
             num_requests=args.num_prompts,
+            max_model_len=args.max_model_len,
         )
 
     elif args.dataset_name == "mlperf":
@@ -1377,7 +1381,7 @@ def create_argument_parser():
     mmlu_group.add_argument(
         "--mmlu-num-shots",
         type=int,
-        default=5,
+        default=0,
         help="Number of shots for MMLU few-shot examples.",
     )
     mmlu_group.add_argument(
