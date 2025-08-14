@@ -8,7 +8,9 @@ WORKDIR /workspace/tpu_commons
 
 # Build tpu_commons
 COPY tpu_commons .
-RUN python3 -m pip install -e .
+RUN python3 -m pip install -e . \
+    --index-url https://us-python.pkg.dev/ml-oss-artifacts-published/jax/simple/ \
+    --find-links https://storage.googleapis.com/jax-releases/libtpu_releases.html
 
 WORKDIR /workspace/torchax
 
