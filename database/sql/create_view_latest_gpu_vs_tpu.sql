@@ -57,6 +57,7 @@ FROM (
       FROM HourlyRunAll30Days q
       WHERE q.Status = 'COMPLETED'
         AND q.Device IN ('h100-8', 'v6e-8', 'v6e-1')
+        AND q.RunType = 'HOURLY'
       GROUP BY q.Model, q.JobReference
       HAVING COUNT(DISTINCT q.Device) >= 2
     ) p
@@ -65,6 +66,7 @@ FROM (
   ON f.Model = latest.Model AND f.JobReference = latest.LatestJobRef
   WHERE f.Status = 'COMPLETED'
     AND f.Device IN ('h100-8', 'v6e-8', 'v6e-1')
+    AND f.RunType = 'HOURLY'
 ) j
 GROUP BY j.Model, j.JobReference
 ORDER BY j.Model;

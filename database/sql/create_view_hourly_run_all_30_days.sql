@@ -7,6 +7,7 @@ SELECT
   RunRecord.CodeHash,
   RunRecord.Status,
   RunRecord.Device,
+  RunRecord.RunType,
   IFNULL(RunRecord.MedianITL, 0) AS MedianITL,
   IFNULL(RunRecord.MedianTPOT, 0) AS MedianTPOT,
   IFNULL(RunRecord.MedianTTFT, 0) AS MedianTTFT,
@@ -20,7 +21,7 @@ SELECT
 FROM
   RunRecord
 WHERE
-  RunRecord.RunType = 'HOURLY'
+  RunRecord.RunType in ('HOURLY', 'HOURLY_AX_JAX')
   AND RunRecord.Status IN ('COMPLETED',
     'FAILED')  
   AND RunRecord.CreatedTime >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
