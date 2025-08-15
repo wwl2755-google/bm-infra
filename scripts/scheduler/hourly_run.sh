@@ -101,9 +101,9 @@ if [[ "$HOUR_NOW" == "01" || "$HOUR_NOW" == "13" ]]; then
   # echo "./scripts/scheduler/create_job.sh ./cases/autotune_torchax_jax_customer1.csv \"\" $TAG CUSTOMER1_AUTOTUNE_AX_JAX TPU_COMMONS \"TPU_BACKEND_TYPE=jax;MODEL_IMPL_TYPE=vllm\""
   # ./scripts/scheduler/create_job.sh ./cases/autotune_torchax_jax_customer1.csv "" $TAG CUSTOMER1_AUTOTUNE_AX_JAX TPU_COMMONS "TPU_BACKEND_TYPE=jax;MODEL_IMPL_TYPE=vllm"
 
-  # # JAX accuracy
-  # echo "./scripts/scheduler/create_job.sh ./cases/accuracy_jax.csv \"\" $TAG AUTOTUNE_AX_JAX TPU_COMMONS \"TPU_BACKEND_TYPE=jax;MODEL_IMPL_TYPE=vllm\""
-  # ./scripts/scheduler/create_job.sh ./cases/accuracy.csv "" $TAG AUTOTUNE_AX_JAX TPU_COMMONS "TPU_BACKEND_TYPE=jax;MODEL_IMPL_TYPE=vllm"
+  # JAX accuracy
+  echo "./scripts/scheduler/create_job.sh ./cases/accuracy_jax.csv \"\" $TAG AUTOTUNE_AX_JAX TPU_COMMONS \"TPU_BACKEND_TYPE=jax;MODEL_IMPL_TYPE=vllm\""
+  ./scripts/scheduler/create_job.sh ./cases/accuracy.csv "" $TAG AUTOTUNE_AX_JAX TPU_COMMONS "TPU_BACKEND_TYPE=jax;MODEL_IMPL_TYPE=vllm"
 
 fi
 
