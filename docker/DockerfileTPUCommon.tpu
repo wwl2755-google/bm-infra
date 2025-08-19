@@ -5,6 +5,9 @@ FROM $BASE_IMAGE
 
 WORKDIR /workspace/tpu_commons
 
+# TODO(cuiq) temp solution and should be deleted when vllm fixes this.
+RUN python3 -m pip install numba
+
 # Build tpu_commons
 COPY tpu_commons .
 RUN python3 -m pip install -e . \
