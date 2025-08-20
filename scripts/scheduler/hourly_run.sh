@@ -103,7 +103,7 @@ if [[ "$HOUR_NOW" == "01" || "$HOUR_NOW" == "13" ]]; then
 
   # JAX accuracy
   echo "./scripts/scheduler/create_job.sh ./cases/accuracy_jax.csv \"\" $TAG JAX_ACCURACY TPU_COMMONS \"TPU_BACKEND_TYPE=jax;\""
-  ./scripts/scheduler/create_job.sh ./cases/accuracy.csv "" $TAG JAX_ACCURACY TPU_COMMONS "TPU_BACKEND_TYPE=jax;"
+  ./scripts/scheduler/create_job.sh ./cases/accuracy_jax.csv "" $TAG JAX_ACCURACY TPU_COMMONS "TPU_BACKEND_TYPE=jax;"
 
 fi
 
