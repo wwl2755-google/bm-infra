@@ -217,7 +217,7 @@ run_benchmark(){
   elif [ "$DATASET" = "hf" ]; then
     dataset_path="lmarena-ai/VisionArena-Chat" 
     python benchmarks/benchmark_serving.py \
-      --backend vllm-chat \
+      --backend vllm \
       --model $MODEL \
       --request-rate $request_rate \
       --dataset-name hf \
