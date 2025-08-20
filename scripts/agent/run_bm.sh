@@ -222,7 +222,7 @@ run_benchmark(){
       --request-rate $request_rate \
       --dataset-name hf \
       --dataset-path $dataset_path \
-      --num-prompts 10 \
+      --num-prompts "$NUM_PROMPTS" \
       --percentile-metrics ttft,tpot,itl,e2el \
       $PROFILE_FLAG \
       --ignore-eos > "$BM_LOG" 2>&1
