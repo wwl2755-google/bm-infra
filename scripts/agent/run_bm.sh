@@ -212,7 +212,21 @@ run_benchmark(){
     fi    
 
     python benchmarks/benchmark_serving.py "${ARGS[@]}" > "$BM_LOG" 2>&1
-    
+
+  # only used for VL model
+  elif [ "$DATASET" = "hf" ]; then
+    dataset_path="lmarena-ai/VisionArena-Chat" 
+    python benchmarks/benchmark_serving.py \
+      --backend vllm \
+      --model $MODEL \
+      --request-rate $request_rate \
+      --dataset-name hf \
+      --dataset-path $dataset_path \
+      --num-prompts "$NUM_PROMPTS" \
+      --percentile-metrics ttft,tpot,itl,e2el \
+      $PROFILE_FLAG \
+      --ignore-eos > "$BM_LOG" 2>&1
+
   else
     echo "Error: unsupported dataset '$DATASET'" > "$BM_LOG" 2>&1
     exit 1

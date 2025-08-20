@@ -10,3 +10,4 @@ v6e-1,microsoft/Phi-3-mini-128k-instruct,128,1024,1,2048,sonnet,1800,128,,1000
 v6e-1,meta-llama/Llama-3.1-8B-Instruct,256,1024,1,2048,sonnet,1800,128,,1000
 v6e-8,meta-llama/Llama-3.1-70B-Instruct,128,1024,8,2048,sonnet,1800,128,,1000
 v6e-8,meta-llama/Llama-3.3-70B-Instruct,128,1024,8,2048,sonnet,1800,128,,1000
+v6e-1,Qwen/Qwen2.5-VL-3B-Instruct,128,98304,1,98304,hf,1800,128,,10
