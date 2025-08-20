@@ -55,7 +55,7 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
 echo "→ Granting GCS read access..."
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
   --member="user:$USER_EMAIL" \
-  --role="roles/storage.objectViewer"
+  --role="roles/storage.objectAdmin"
 
 # 5. Write to Artifact Registry
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
