@@ -39,6 +39,6 @@ variable "v6e_8_count" {
 }
 
 variable "branch_hash" {
-  default     = "49f9415095c053f729702035c9daeb14c5c65f02"
+  default     = "274272fffb648a53ccf8862e91af8cce412d0719"
   description = "commit hash of bm-infra branch."
 }
